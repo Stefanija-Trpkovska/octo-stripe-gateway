@@ -9,21 +9,28 @@ module OctoStripeGateway
     end
 
     def create
-      @payment = Payment.create!(
-        amount: params[:amount],
-        currency: params[:currency] || OctoStripeGateway.currency
-      )
+      @payment = Payment.create!(payment_params)
       @payment.create_payment_intent
 
       respond_to do |format|
-        format.html
+        format.html { render :create }
         format.json { render json: payment_response(@payment), status: :created }
+      end
+    rescue ActiveRecord::RecordInvalid => e
+      respond_to do |format|
+        format.html { render :new }
+        format.json { render json: { error: e.message }, status: :unprocessable_entity }
+      end
+    rescue Stripe::StripeError => e
+      respond_to do |format|
+        format.html { render :new }
+        format.json { render json: { error: e.message }, status: :payment_required }
       end
     end
 
     def show
       respond_to do |format|
-        format.html
+        format.html { render :show }
         format.json { render json: payment_response(@payment) }
       end
     end
@@ -32,7 +39,7 @@ module OctoStripeGateway
       @payment.confirm_payment unless @payment.paid?
 
       respond_to do |format|
-        format.html
+        format.html { render :complete }
         format.json { render json: payment_response(@payment) }
       end
     end
@@ -41,6 +48,17 @@ module OctoStripeGateway
 
     def set_payment
       @payment = Payment.find(params[:id])
+    rescue ActiveRecord::RecordNotFound
+      respond_to do |format|
+        format.html { redirect_to root_path }
+        format.json { render json: { error: "Payment not found" }, status: :not_found }
+      end
+    end
+
+    def payment_params
+      params.permit(:amount, :currency).tap do |p|
+        p[:currency] ||= OctoStripeGateway.currency
+      end
     end
 
     def payment_response(payment)
