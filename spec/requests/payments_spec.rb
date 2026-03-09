@@ -90,7 +90,7 @@ RSpec.describe "Payments API", type: :request do
     end
   end
 
-  describe "GET /payments/:id/complete" do
+  describe "PATCH /payments/:id/complete" do
     it "confirms a succeeded payment" do
       payment = OctoStripeGateway::Payment.create!(
         amount: 2000,
@@ -101,7 +101,7 @@ RSpec.describe "Payments API", type: :request do
       allow(stripe_client).to receive(:find_payment_intent)
         .and_return(stripe_payment_intent(status: "succeeded"))
 
-      get "/payments/payments/#{payment.id}/complete.json"
+      patch "/payments/payments/#{payment.id}/complete.json"
 
       expect(response).to have_http_status(:ok)
 
@@ -120,7 +120,7 @@ RSpec.describe "Payments API", type: :request do
       allow(stripe_client).to receive(:find_payment_intent)
         .and_return(stripe_payment_intent(status: "requires_action"))
 
-      get "/payments/payments/#{payment.id}/complete.json"
+      patch "/payments/payments/#{payment.id}/complete.json"
 
       json = JSON.parse(response.body)
       expect(json["status"]).to eq("pending")

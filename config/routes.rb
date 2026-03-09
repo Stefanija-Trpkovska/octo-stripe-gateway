@@ -1,7 +1,7 @@
 OctoStripeGateway::Engine.routes.draw do
   resources :payments, only: [:create, :show] do
     member do
-      get :complete
+      patch :complete
     end
   end
 end
