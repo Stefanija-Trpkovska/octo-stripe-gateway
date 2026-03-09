@@ -27,6 +27,8 @@ module OctoStripeGateway
       @payment.confirm_payment unless @payment.paid?
 
       render json: payment_response(@payment)
+    rescue Stripe::StripeError => e
+      render json: { error: e.message }, status: :bad_gateway
     end
 
     def refund

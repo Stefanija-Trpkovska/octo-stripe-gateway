@@ -4,9 +4,25 @@ require "spec_helper"
 
 RSpec.describe "Payments API", type: :request do
   let(:stripe_client) { instance_double(OctoStripeGateway::StripeClient) }
+  let(:auth_headers) { { "Authorization" => "Bearer test_gateway_key" } }
 
   before do
     allow(OctoStripeGateway::StripeClient).to receive(:new).and_return(stripe_client)
+  end
+
+  describe "authentication" do
+    it "returns 401 without an API key" do
+      post "/payments/payments", params: { amount: 2000 }
+
+      expect(response).to have_http_status(:unauthorized)
+    end
+
+    it "returns 401 with an invalid API key" do
+      post "/payments/payments", params: { amount: 2000 },
+        headers: { "Authorization" => "Bearer wrong_key" }
+
+      expect(response).to have_http_status(:unauthorized)
+    end
   end
 
   describe "POST /payments" do
@@ -16,7 +32,7 @@ RSpec.describe "Payments API", type: :request do
     end
 
     it "creates a payment and returns the stripe client secret" do
-      post "/payments/payments", params: { amount: 2000, currency: "usd" }
+      post "/payments/payments", params: { amount: 2000, currency: "usd" }, headers: auth_headers
 
       expect(response).to have_http_status(:created)
 
@@ -31,14 +47,14 @@ RSpec.describe "Payments API", type: :request do
     end
 
     it "uses default currency when not provided" do
-      post "/payments/payments", params: { amount: 1500 }
+      post "/payments/payments", params: { amount: 1500 }, headers: auth_headers
 
       json = JSON.parse(response.body)
       expect(json["currency"]).to eq("usd")
     end
 
     it "returns 422 when amount is missing" do
-      post "/payments/payments", params: { currency: "usd" }
+      post "/payments/payments", params: { currency: "usd" }, headers: auth_headers
 
       expect(response).to have_http_status(:unprocessable_content)
       json = JSON.parse(response.body)
@@ -46,7 +62,7 @@ RSpec.describe "Payments API", type: :request do
     end
 
     it "returns 422 when amount is invalid" do
-      post "/payments/payments", params: { amount: -100 }
+      post "/payments/payments", params: { amount: -100 }, headers: auth_headers
 
       expect(response).to have_http_status(:unprocessable_content)
     end
@@ -55,7 +71,7 @@ RSpec.describe "Payments API", type: :request do
       allow(stripe_client).to receive(:create_payment_intent)
         .and_raise(Stripe::InvalidRequestError.new("Invalid amount", :amount))
 
-      post "/payments/payments", params: { amount: 2000 }
+      post "/payments/payments", params: { amount: 2000 }, headers: auth_headers
 
       expect(response).to have_http_status(:payment_required)
       json = JSON.parse(response.body)
@@ -72,7 +88,7 @@ RSpec.describe "Payments API", type: :request do
         stripe_client_secret: "pi_show_123_secret"
       )
 
-      get "/payments/payments/#{payment.id}"
+      get "/payments/payments/#{payment.id}", headers: auth_headers
 
       expect(response).to have_http_status(:ok)
 
@@ -83,7 +99,7 @@ RSpec.describe "Payments API", type: :request do
     end
 
     it "returns 404 for non-existent payment" do
-      get "/payments/payments/999999"
+      get "/payments/payments/999999", headers: auth_headers
 
       expect(response).to have_http_status(:not_found)
       json = JSON.parse(response.body)
@@ -102,7 +118,7 @@ RSpec.describe "Payments API", type: :request do
       allow(stripe_client).to receive(:find_payment_intent)
         .and_return(stripe_payment_intent(status: "succeeded"))
 
-      patch "/payments/payments/#{payment.id}/complete"
+      patch "/payments/payments/#{payment.id}/complete", headers: auth_headers
 
       expect(response).to have_http_status(:ok)
 
@@ -121,7 +137,7 @@ RSpec.describe "Payments API", type: :request do
       allow(stripe_client).to receive(:find_payment_intent)
         .and_return(stripe_payment_intent(status: "requires_action"))
 
-      patch "/payments/payments/#{payment.id}/complete"
+      patch "/payments/payments/#{payment.id}/complete", headers: auth_headers
 
       json = JSON.parse(response.body)
       expect(json["status"]).to eq("PENDING")
@@ -140,7 +156,7 @@ RSpec.describe "Payments API", type: :request do
 
       allow(stripe_client).to receive(:refund_payment_intent).and_return(stripe_refund)
 
-      post "/payments/payments/#{payment.id}/refund"
+      post "/payments/payments/#{payment.id}/refund", headers: auth_headers
 
       expect(response).to have_http_status(:ok)
 
@@ -158,7 +174,7 @@ RSpec.describe "Payments API", type: :request do
 
       allow(stripe_client).to receive(:refund_payment_intent)
 
-      post "/payments/payments/#{payment.id}/refund"
+      post "/payments/payments/#{payment.id}/refund", headers: auth_headers
 
       expect(response).to have_http_status(:ok)
 
@@ -179,7 +195,7 @@ RSpec.describe "Payments API", type: :request do
       allow(stripe_client).to receive(:refund_payment_intent)
         .and_raise(Stripe::InvalidRequestError.new("Charge already refunded", :payment_intent))
 
-      post "/payments/payments/#{payment.id}/refund"
+      post "/payments/payments/#{payment.id}/refund", headers: auth_headers
 
       expect(response).to have_http_status(:unprocessable_content)
       json = JSON.parse(response.body)
