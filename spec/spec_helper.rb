@@ -20,4 +20,10 @@ RSpec.configure do |config|
   config.mock_with :rspec do |mocks|
     mocks.verify_partial_doubles = true
   end
+
+  config.before do
+    OctoStripeGateway.currency = "usd"
+    OctoStripeGateway.stripe_api_key = "sk_test_default_key"
+    OctoStripeGateway.stripe_publishable_key = "pk_test_default_key"
+  end
 end
