@@ -23,7 +23,7 @@ RSpec.describe "Payments API", type: :request do
       json = JSON.parse(response.body)
       expect(json["amount"]).to eq(2000)
       expect(json["currency"]).to eq("usd")
-      expect(json["status"]).to eq("pending")
+      expect(json["status"]).to eq("PENDING")
       expect(json["gateway"]).to eq("stripe")
       expect(json["stripePaymentIntentId"]).to eq("pi_test_123")
       expect(json["stripeClientSecret"]).to eq("pi_test_123_secret_abc")
@@ -107,8 +107,8 @@ RSpec.describe "Payments API", type: :request do
       expect(response).to have_http_status(:ok)
 
       json = JSON.parse(response.body)
-      expect(json["status"]).to eq("paid")
-      expect(json["paidAt"]).to be_present
+      expect(json["status"]).to eq("CONFIRMED")
+      expect(json["paidAt"]).to match(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/)
     end
 
     it "returns pending when payment is not yet succeeded" do
@@ -124,7 +124,7 @@ RSpec.describe "Payments API", type: :request do
       patch "/payments/payments/#{payment.id}/complete.json"
 
       json = JSON.parse(response.body)
-      expect(json["status"]).to eq("pending")
+      expect(json["status"]).to eq("PENDING")
     end
   end
 end

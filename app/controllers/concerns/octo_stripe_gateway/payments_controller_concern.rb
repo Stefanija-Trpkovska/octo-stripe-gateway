@@ -66,14 +66,18 @@ module OctoStripeGateway
         id: payment.id,
         amount: payment.amount,
         currency: payment.currency,
-        status: payment.status,
+        status: octo_status(payment.status),
         gateway: "stripe",
         stripePaymentIntentId: payment.stripe_payment_intent_id,
         stripeClientSecret: payment.stripe_client_secret,
         publishableKey: OctoStripeGateway.stripe_publishable_key,
-        paidAt: payment.paid_at,
+        paidAt: payment.paid_at&.iso8601,
         errorMessage: payment.error_message
       }.compact
+    end
+
+    def octo_status(status)
+      { "pending" => "PENDING", "paid" => "CONFIRMED", "failed" => "FAILED" }[status]
     end
   end
 end

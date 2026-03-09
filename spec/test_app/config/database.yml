@@ -1,8 +1,8 @@
 default: &default
   adapter: postgresql
-  host: localhost
+  host: 127.0.0.1
   username: postgres
-  password: <%= ENV.fetch("POSTGRES_PASSWORD", "postgres") %>
+  password: <%= ENV.fetch("POSTGRES_PASSWORD", "password") %>
 
 development:
   <<: *default

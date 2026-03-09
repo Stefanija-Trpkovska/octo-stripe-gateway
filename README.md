@@ -47,7 +47,20 @@ POST /payments/payments.json
 Params: { amount: 2000, currency: "usd" }
 ```
 
-Returns the Stripe `client_secret` for the SPA to confirm with Stripe.js.
+Response (camelCase, OCTo-compliant):
+
+```json
+{
+  "id": 1,
+  "amount": 2000,
+  "currency": "usd",
+  "status": "pending",
+  "gateway": "stripe",
+  "stripePaymentIntentId": "pi_...",
+  "stripeClientSecret": "pi_..._secret_...",
+  "publishableKey": "pk_test_..."
+}
+```
 
 ### Get Payment
 
@@ -58,7 +71,7 @@ GET /payments/payments/:id.json
 ### Complete Payment
 
 ```
-GET /payments/payments/:id/complete.json
+PATCH /payments/payments/:id/complete.json
 ```
 
 Checks with Stripe if the payment succeeded and updates the record.

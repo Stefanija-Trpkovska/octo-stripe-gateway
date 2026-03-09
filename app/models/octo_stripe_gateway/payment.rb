@@ -4,7 +4,7 @@ module OctoStripeGateway
   class Payment < ApplicationRecord
     self.table_name = "osg_payments"
 
-    enum :status, { pending: 0, paid: 1, failed: 2 }
+    enum :status, { pending: "pending", paid: "paid", failed: "failed" }
 
     belongs_to :payable, polymorphic: true, optional: true
 
