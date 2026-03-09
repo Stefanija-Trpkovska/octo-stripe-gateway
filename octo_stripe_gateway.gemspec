@@ -5,7 +5,7 @@ Gem::Specification.new do |spec|
   spec.version     = OctoStripeGateway::VERSION
   spec.authors     = [ "Stefanija-Trpkovska" ]
   spec.email       = [ "stefanijatrpkovska@outlook.com" ]
-  spec.homepage    = "https://github.com/stefanija-trpkovska/octo_stripe_gateway"
+  spec.homepage    = "https://github.com/Stefanija-Trpkovska/octo-stripe-gateway"
   spec.summary     = "OCTo-compliant Stripe payment gateway for Rails"
   spec.description = "Rails engine providing Stripe payment API for SPAs"
   spec.license     = "MIT"
@@ -19,6 +19,6 @@ Gem::Specification.new do |spec|
 
   spec.required_ruby_version = ">= 3.2"
 
-  spec.add_dependency "rails", ">= 8.0"
+  spec.add_dependency "rails", "~> 8.0"
   spec.add_dependency "stripe", "~> 18.0"
 end
