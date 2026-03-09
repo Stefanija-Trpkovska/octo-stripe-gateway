@@ -71,6 +71,29 @@ RSpec.describe "Webhooks API", type: :request do
       expect(response).to have_http_status(:ok)
     end
 
+    it "marks payment as refunded on charge.refunded" do
+      payment.update!(status: :paid, paid_at: Time.current)
+
+      event = stripe_charge_refunded_event(payment_intent_id: "pi_webhook_123")
+
+      post_webhook(event)
+
+      expect(response).to have_http_status(:ok)
+      expect(payment.reload).to be_refunded
+      expect(payment.refunded_at).to be_present
+    end
+
+    it "does not update an already refunded payment on charge.refunded" do
+      payment.update!(status: :refunded, refunded_at: 1.hour.ago)
+      original_refunded_at = payment.refunded_at
+
+      event = stripe_charge_refunded_event(payment_intent_id: "pi_webhook_123")
+
+      post_webhook(event)
+
+      expect(payment.reload.refunded_at).to eq(original_refunded_at)
+    end
+
     it "does not update an already paid payment" do
       payment.update!(status: :paid, paid_at: 1.hour.ago)
       original_paid_at = payment.paid_at

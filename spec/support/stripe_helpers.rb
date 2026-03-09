@@ -38,6 +38,22 @@ module StripeHelpers
     )
   end
 
+  def stripe_charge_refunded_event(payment_intent_id:)
+    Stripe::Event.construct_from(
+      "id" => "evt_test_#{SecureRandom.hex(8)}",
+      "type" => "charge.refunded",
+      "data" => {
+        "object" => {
+          "id" => "ch_test_#{SecureRandom.hex(8)}",
+          "object" => "charge",
+          "payment_intent" => payment_intent_id,
+          "refunded" => true,
+          "amount_refunded" => 2000
+        }
+      }
+    )
+  end
+
   def stripe_webhook_event(type:, payment_intent_id:, error_message: nil)
     payment_intent_data = {
       "id" => payment_intent_id,
