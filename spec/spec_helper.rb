@@ -25,5 +25,6 @@ RSpec.configure do |config|
     OctoStripeGateway.currency = "usd"
     OctoStripeGateway.stripe_api_key = "sk_test_default_key"
     OctoStripeGateway.stripe_publishable_key = "pk_test_default_key"
+    OctoStripeGateway.stripe_webhook_secret = "whsec_test_secret"
   end
 end

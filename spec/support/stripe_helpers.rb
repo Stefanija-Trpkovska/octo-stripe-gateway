@@ -27,4 +27,24 @@ module StripeHelpers
       metadata: {}
     )
   end
+
+  def stripe_webhook_event(type:, payment_intent_id:, error_message: nil)
+    payment_intent_data = {
+      "id" => payment_intent_id,
+      "object" => "payment_intent",
+      "amount" => 2000,
+      "currency" => "usd",
+      "status" => type == "payment_intent.succeeded" ? "succeeded" : "requires_payment_method"
+    }
+
+    if error_message
+      payment_intent_data["last_payment_error"] = { "message" => error_message }
+    end
+
+    Stripe::Event.construct_from(
+      "id" => "evt_test_#{SecureRandom.hex(8)}",
+      "type" => type,
+      "data" => { "object" => payment_intent_data }
+    )
+  end
 end

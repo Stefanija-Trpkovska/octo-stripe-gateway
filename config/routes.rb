@@ -4,4 +4,6 @@ OctoStripeGateway::Engine.routes.draw do
       patch :complete
     end
   end
+
+  post "webhooks", to: "webhooks#create"
 end
