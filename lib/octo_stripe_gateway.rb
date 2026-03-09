@@ -1,6 +1,20 @@
+# frozen_string_literal: true
+
 require "octo_stripe_gateway/version"
 require "octo_stripe_gateway/engine"
+require "octo_stripe_gateway/stripe_client"
 
 module OctoStripeGateway
-  # Your code goes here...
+  mattr_accessor :stripe_api_key
+  @@stripe_api_key = ENV.fetch("STRIPE_API_KEY", "sk_test_default_key")
+
+  mattr_accessor :stripe_publishable_key
+  @@stripe_publishable_key = ENV.fetch("STRIPE_PUBLISHABLE_KEY", "pk_test_default_key")
+
+  mattr_accessor :currency
+  @@currency = "usd"
+
+  def self.setup
+    yield self
+  end
 end
