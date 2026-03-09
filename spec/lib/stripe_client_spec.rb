@@ -5,10 +5,6 @@ require "spec_helper"
 RSpec.describe OctoStripeGateway::StripeClient do
   subject(:client) { described_class.new }
 
-  before do
-    OctoStripeGateway.stripe_api_key = "sk_test_fake"
-  end
-
   describe "#create_payment_intent" do
     it "creates a Stripe PaymentIntent with amount and currency" do
       intent = stripe_payment_intent
@@ -16,7 +12,10 @@ RSpec.describe OctoStripeGateway::StripeClient do
 
       result = client.create_payment_intent(2000, "usd")
 
-      expect(Stripe::PaymentIntent).to have_received(:create).with(amount: 2000, currency: "usd")
+      expect(Stripe::PaymentIntent).to have_received(:create).with(
+        { amount: 2000, currency: "usd" },
+        { api_key: "sk_test_default_key" }
+      )
       expect(result.id).to eq("pi_test_123")
       expect(result.client_secret).to eq("pi_test_123_secret_abc")
       expect(result.status).to eq("requires_payment_method")
@@ -28,7 +27,10 @@ RSpec.describe OctoStripeGateway::StripeClient do
 
       client.create_payment_intent(1000)
 
-      expect(Stripe::PaymentIntent).to have_received(:create).with(amount: 1000, currency: "eur")
+      expect(Stripe::PaymentIntent).to have_received(:create).with(
+        { amount: 1000, currency: "eur" },
+        { api_key: "sk_test_default_key" }
+      )
     end
   end
 
@@ -39,7 +41,10 @@ RSpec.describe OctoStripeGateway::StripeClient do
 
       result = client.find_payment_intent("pi_test_123")
 
-      expect(Stripe::PaymentIntent).to have_received(:retrieve).with("pi_test_123")
+      expect(Stripe::PaymentIntent).to have_received(:retrieve).with(
+        "pi_test_123",
+        { api_key: "sk_test_default_key" }
+      )
       expect(result.status).to eq("succeeded")
     end
   end
