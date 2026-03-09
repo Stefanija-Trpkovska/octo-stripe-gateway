@@ -19,7 +19,7 @@ module OctoStripeGateway
     rescue ActiveRecord::RecordInvalid => e
       respond_to do |format|
         format.html { render :new }
-        format.json { render json: { error: e.message }, status: :unprocessable_entity }
+        format.json { render json: { error: e.message }, status: :unprocessable_content }
       end
     rescue Stripe::StripeError => e
       respond_to do |format|

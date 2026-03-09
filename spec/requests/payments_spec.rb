@@ -39,7 +39,7 @@ RSpec.describe "Payments API", type: :request do
     it "returns 422 when amount is missing" do
       post "/payments/payments.json", params: { currency: "usd" }
 
-      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response).to have_http_status(:unprocessable_content)
       json = JSON.parse(response.body)
       expect(json["error"]).to be_present
     end
@@ -47,7 +47,7 @@ RSpec.describe "Payments API", type: :request do
     it "returns 422 when amount is invalid" do
       post "/payments/payments.json", params: { amount: -100 }
 
-      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response).to have_http_status(:unprocessable_content)
     end
 
     it "returns 402 when Stripe fails" do
