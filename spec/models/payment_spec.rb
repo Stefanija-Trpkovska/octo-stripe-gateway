@@ -20,15 +20,15 @@ RSpec.describe OctoStripeGateway::Payment, type: :model do
   end
 
   describe "#create_payment_intent" do
-    it "creates a Stripe PaymentIntent and stores the response" do
+    it "creates a Stripe PaymentIntent and returns the client secret" do
       intent = stripe_payment_intent
       allow(stripe_client).to receive(:create_payment_intent).and_return(intent)
 
-      payment.create_payment_intent
+      client_secret = payment.create_payment_intent
 
       payment.reload
       expect(payment.stripe_payment_intent_id).to eq("pi_test_123")
-      expect(payment.stripe_client_secret).to eq("pi_test_123_secret_abc")
+      expect(client_secret).to eq("pi_test_123_secret_abc")
     end
 
     it "does nothing if payment intent already exists" do

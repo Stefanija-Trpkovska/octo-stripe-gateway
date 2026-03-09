@@ -84,8 +84,7 @@ RSpec.describe "Payments API", type: :request do
       payment = OctoStripeGateway::Payment.create!(
         amount: 3000,
         currency: "eur",
-        stripe_payment_intent_id: "pi_show_123",
-        stripe_client_secret: "pi_show_123_secret"
+        stripe_payment_intent_id: "pi_show_123"
       )
 
       get "/payments/payments/#{payment.id}", headers: auth_headers

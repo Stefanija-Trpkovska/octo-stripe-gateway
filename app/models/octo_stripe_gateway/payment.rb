@@ -4,50 +4,40 @@ module OctoStripeGateway
   class Payment < ApplicationRecord
     self.table_name = "osg_payments"
 
+    include StripePaymentConcern
+
+    OCTO_STATUSES = { "pending" => "PENDING", "paid" => "CONFIRMED", "failed" => "FAILED", "refunded" => "REFUNDED" }.freeze
+
     enum :status, { pending: "pending", paid: "paid", failed: "failed", refunded: "refunded" }
 
     belongs_to :payable, polymorphic: true, optional: true
 
+    before_validation :set_default_currency, on: :create
+
     validates :amount, presence: true, numericality: { greater_than: 0 }
     validates :currency, presence: true
 
-    def stripe_client
-      @stripe_client ||= StripeClient.new
+    def as_octo_json(stripe_client_secret: nil)
+      {
+        id: id,
+        amount: amount,
+        currency: currency,
+        status: OCTO_STATUSES[status],
+        gateway: "stripe",
+        stripePaymentIntentId: stripe_payment_intent_id,
+        stripeClientSecret: stripe_client_secret,
+        publishableKey: OctoStripeGateway.stripe_publishable_key,
+        paidAt: paid_at&.iso8601,
+        refundedAt: refunded_at&.iso8601,
+        errorMessage: error_message
+      }.compact
     end
 
-    def create_payment_intent
-      return if stripe_payment_intent_id.present?
+    private
 
-      intent = stripe_client.create_payment_intent(amount, currency, idempotency_key: "create_pi_#{id}")
-      update!(
-        stripe_payment_intent_id: intent.id,
-        stripe_client_secret: intent.client_secret
-      )
-    end
-
-    def refund_payment
-      with_lock do
-        return unless paid?
-
-        stripe_client.refund_payment_intent(stripe_payment_intent_id, idempotency_key: "refund_#{id}")
-        update!(status: :refunded, refunded_at: Time.current)
-      end
-    end
-
-    def confirm_payment
-      with_lock do
-        return if paid?
-
-        intent = stripe_client.find_payment_intent(stripe_payment_intent_id)
-
-        case intent.status
-        when "succeeded"
-          update!(status: :paid, paid_at: Time.current)
-        when "canceled", "requires_payment_method"
-          message = intent.last_payment_error&.message || "Payment #{intent.status}"
-          update!(status: :failed, error_message: message)
-        end
-      end
+    def set_default_currency
+      self.currency ||= OctoStripeGateway.currency
     end
   end
 end
+

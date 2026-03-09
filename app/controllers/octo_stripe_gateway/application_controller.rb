@@ -16,6 +16,7 @@ module OctoStripeGateway
     end
 
     def deny_access
+      Rails.logger.warn("[OctoStripeGateway] Unauthorized request from #{request.remote_ip}")
       render json: { error: "Unauthorized" }, status: :unauthorized
     end
   end
