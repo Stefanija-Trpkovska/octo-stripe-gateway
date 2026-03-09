@@ -24,9 +24,10 @@ RSpec.describe "Payments API", type: :request do
       expect(json["amount"]).to eq(2000)
       expect(json["currency"]).to eq("usd")
       expect(json["status"]).to eq("pending")
-      expect(json["stripe_payment_intent_id"]).to eq("pi_test_123")
-      expect(json["stripe_client_secret"]).to eq("pi_test_123_secret_abc")
-      expect(json["publishable_key"]).to be_present
+      expect(json["gateway"]).to eq("stripe")
+      expect(json["stripePaymentIntentId"]).to eq("pi_test_123")
+      expect(json["stripeClientSecret"]).to eq("pi_test_123_secret_abc")
+      expect(json["publishableKey"]).to be_present
     end
 
     it "uses default currency when not provided" do
@@ -78,7 +79,7 @@ RSpec.describe "Payments API", type: :request do
       json = JSON.parse(response.body)
       expect(json["amount"]).to eq(3000)
       expect(json["currency"]).to eq("eur")
-      expect(json["stripe_payment_intent_id"]).to eq("pi_show_123")
+      expect(json["stripePaymentIntentId"]).to eq("pi_show_123")
     end
 
     it "returns 404 for non-existent payment" do
@@ -107,7 +108,7 @@ RSpec.describe "Payments API", type: :request do
 
       json = JSON.parse(response.body)
       expect(json["status"]).to eq("paid")
-      expect(json["paid_at"]).to be_present
+      expect(json["paidAt"]).to be_present
     end
 
     it "returns pending when payment is not yet succeeded" do

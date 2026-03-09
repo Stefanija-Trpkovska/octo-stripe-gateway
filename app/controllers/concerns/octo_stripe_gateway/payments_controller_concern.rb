@@ -67,11 +67,13 @@ module OctoStripeGateway
         amount: payment.amount,
         currency: payment.currency,
         status: payment.status,
-        stripe_payment_intent_id: payment.stripe_payment_intent_id,
-        stripe_client_secret: payment.stripe_client_secret,
-        publishable_key: OctoStripeGateway.stripe_publishable_key,
-        paid_at: payment.paid_at
-      }
+        gateway: "stripe",
+        stripePaymentIntentId: payment.stripe_payment_intent_id,
+        stripeClientSecret: payment.stripe_client_secret,
+        publishableKey: OctoStripeGateway.stripe_publishable_key,
+        paidAt: payment.paid_at,
+        errorMessage: payment.error_message
+      }.compact
     end
   end
 end
