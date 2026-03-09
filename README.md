@@ -54,7 +54,7 @@ Response (camelCase, OCTo-compliant):
   "id": 1,
   "amount": 2000,
   "currency": "usd",
-  "status": "pending",
+  "status": "PENDING",
   "gateway": "stripe",
   "stripePaymentIntentId": "pi_...",
   "stripeClientSecret": "pi_..._secret_...",
