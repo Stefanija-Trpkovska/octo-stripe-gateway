@@ -1,0 +1,4 @@
+module OctoStripeGateway
+  class ApplicationController < ActionController::Base
+  end
+end
