@@ -15,6 +15,10 @@ module OctoStripeGateway
       Stripe::PaymentIntent.retrieve(payment_intent_id, { api_key: api_key })
     end
 
+    def refund_payment_intent(payment_intent_id)
+      Stripe::Refund.create({ payment_intent: payment_intent_id }, { api_key: api_key })
+    end
+
     private
 
     def api_key

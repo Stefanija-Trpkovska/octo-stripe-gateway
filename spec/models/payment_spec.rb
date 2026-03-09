@@ -98,4 +98,29 @@ RSpec.describe OctoStripeGateway::Payment, type: :model do
       expect(payment.reload).to be_pending
     end
   end
+
+  describe "#refund_payment" do
+    before do
+      payment.update!(status: :paid, paid_at: Time.current, stripe_payment_intent_id: "pi_test_123")
+    end
+
+    it "refunds a paid payment" do
+      allow(stripe_client).to receive(:refund_payment_intent).and_return(stripe_refund)
+
+      payment.refund_payment
+
+      payment.reload
+      expect(payment).to be_refunded
+      expect(payment.refunded_at).to be_present
+    end
+
+    it "does nothing if payment is not paid" do
+      payment.update!(status: :pending)
+      allow(stripe_client).to receive(:refund_payment_intent)
+
+      payment.refund_payment
+
+      expect(stripe_client).not_to have_received(:refund_payment_intent)
+    end
+  end
 end

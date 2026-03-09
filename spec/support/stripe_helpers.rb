@@ -28,6 +28,16 @@ module StripeHelpers
     )
   end
 
+  def stripe_refund(payment_intent_id: "pi_test_123")
+    double("Stripe::Refund",
+      id: "re_test_123",
+      object: "refund",
+      amount: 2000,
+      payment_intent: payment_intent_id,
+      status: "succeeded"
+    )
+  end
+
   def stripe_webhook_event(type:, payment_intent_id:, error_message: nil)
     payment_intent_data = {
       "id" => payment_intent_id,

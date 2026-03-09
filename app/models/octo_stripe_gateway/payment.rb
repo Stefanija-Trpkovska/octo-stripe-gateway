@@ -4,7 +4,7 @@ module OctoStripeGateway
   class Payment < ApplicationRecord
     self.table_name = "osg_payments"
 
-    enum :status, { pending: "pending", paid: "paid", failed: "failed" }
+    enum :status, { pending: "pending", paid: "paid", failed: "failed", refunded: "refunded" }
 
     belongs_to :payable, polymorphic: true, optional: true
 
@@ -23,6 +23,13 @@ module OctoStripeGateway
         stripe_payment_intent_id: intent.id,
         stripe_client_secret: intent.client_secret
       )
+    end
+
+    def refund_payment
+      return unless paid?
+
+      stripe_client.refund_payment_intent(stripe_payment_intent_id)
+      update!(status: :refunded, refunded_at: Time.current)
     end
 
     def confirm_payment

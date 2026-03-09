@@ -5,7 +5,7 @@ module OctoStripeGateway
     extend ActiveSupport::Concern
 
     included do
-      before_action :set_payment, only: %i[show complete]
+      before_action :set_payment, only: %i[show complete refund]
     end
 
     def create
@@ -27,6 +27,14 @@ module OctoStripeGateway
       @payment.confirm_payment unless @payment.paid?
 
       render json: payment_response(@payment)
+    end
+
+    def refund
+      @payment.refund_payment
+
+      render json: payment_response(@payment)
+    rescue Stripe::StripeError => e
+      render json: { error: e.message }, status: :unprocessable_content
     end
 
     private
@@ -54,12 +62,13 @@ module OctoStripeGateway
         stripeClientSecret: payment.stripe_client_secret,
         publishableKey: OctoStripeGateway.stripe_publishable_key,
         paidAt: payment.paid_at&.iso8601,
+        refundedAt: payment.refunded_at&.iso8601,
         errorMessage: payment.error_message
       }.compact
     end
 
     def octo_status(status)
-      { "pending" => "PENDING", "paid" => "CONFIRMED", "failed" => "FAILED" }[status]
+      { "pending" => "PENDING", "paid" => "CONFIRMED", "failed" => "FAILED", "refunded" => "REFUNDED" }[status]
     end
   end
 end

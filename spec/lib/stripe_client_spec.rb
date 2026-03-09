@@ -48,4 +48,19 @@ RSpec.describe OctoStripeGateway::StripeClient do
       expect(result.status).to eq("succeeded")
     end
   end
+
+  describe "#refund_payment_intent" do
+    it "creates a Stripe Refund for the payment intent" do
+      refund = stripe_refund
+      allow(Stripe::Refund).to receive(:create).and_return(refund)
+
+      result = client.refund_payment_intent("pi_test_123")
+
+      expect(Stripe::Refund).to have_received(:create).with(
+        { payment_intent: "pi_test_123" },
+        { api_key: "sk_test_default_key" }
+      )
+      expect(result.status).to eq("succeeded")
+    end
+  end
 end

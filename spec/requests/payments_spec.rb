@@ -127,4 +127,63 @@ RSpec.describe "Payments API", type: :request do
       expect(json["status"]).to eq("PENDING")
     end
   end
+
+  describe "POST /payments/:id/refund" do
+    it "refunds a paid payment" do
+      payment = OctoStripeGateway::Payment.create!(
+        amount: 2000,
+        currency: "usd",
+        status: :paid,
+        paid_at: Time.current,
+        stripe_payment_intent_id: "pi_refund_123"
+      )
+
+      allow(stripe_client).to receive(:refund_payment_intent).and_return(stripe_refund)
+
+      post "/payments/payments/#{payment.id}/refund"
+
+      expect(response).to have_http_status(:ok)
+
+      json = JSON.parse(response.body)
+      expect(json["status"]).to eq("REFUNDED")
+      expect(json["refundedAt"]).to match(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/)
+    end
+
+    it "does not refund a pending payment" do
+      payment = OctoStripeGateway::Payment.create!(
+        amount: 2000,
+        currency: "usd",
+        stripe_payment_intent_id: "pi_pending_refund"
+      )
+
+      allow(stripe_client).to receive(:refund_payment_intent)
+
+      post "/payments/payments/#{payment.id}/refund"
+
+      expect(response).to have_http_status(:ok)
+
+      json = JSON.parse(response.body)
+      expect(json["status"]).to eq("PENDING")
+      expect(stripe_client).not_to have_received(:refund_payment_intent)
+    end
+
+    it "returns 422 when Stripe refund fails" do
+      payment = OctoStripeGateway::Payment.create!(
+        amount: 2000,
+        currency: "usd",
+        status: :paid,
+        paid_at: Time.current,
+        stripe_payment_intent_id: "pi_refund_fail"
+      )
+
+      allow(stripe_client).to receive(:refund_payment_intent)
+        .and_raise(Stripe::InvalidRequestError.new("Charge already refunded", :payment_intent))
+
+      post "/payments/payments/#{payment.id}/refund"
+
+      expect(response).to have_http_status(:unprocessable_content)
+      json = JSON.parse(response.body)
+      expect(json["error"]).to be_present
+    end
+  end
 end
