@@ -5,7 +5,7 @@ gemspec
 
 gem "puma"
 
-gem "sqlite3"
+gem "pg"
 
 # Omakase Ruby styling [https://github.com/rails/rubocop-rails-omakase/]
 gem "rubocop-rails-omakase", require: false
@@ -14,3 +14,8 @@ gem "rubocop-rails-omakase", require: false
 # gem "debug", ">= 1.0.0"
 
 gem "tzinfo-data", platforms: %i[ windows jruby ]
+
+group :test do
+  gem "rspec-rails"
+  gem "webmock"
+end

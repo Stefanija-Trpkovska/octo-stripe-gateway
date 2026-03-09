@@ -1,0 +1,17 @@
+default: &default
+  adapter: postgresql
+  host: localhost
+  username: postgres
+  password: <%= ENV.fetch("POSTGRES_PASSWORD", "postgres") %>
+
+development:
+  <<: *default
+  database: osg_development
+
+test:
+  <<: *default
+  database: osg_test
+
+production:
+  <<: *default
+  database: osg_production

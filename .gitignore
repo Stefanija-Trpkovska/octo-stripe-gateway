@@ -3,3 +3,7 @@
 /log/*.log
 /pkg/
 /tmp/
+Gemfile.lock
+spec/test_app/db/schema.rb
+spec/test_app/log/
+spec/test_app/tmp/
