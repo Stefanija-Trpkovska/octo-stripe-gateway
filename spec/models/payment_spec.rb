@@ -66,13 +66,27 @@ RSpec.describe OctoStripeGateway::Payment, type: :model do
       expect(stripe_client).not_to have_received(:find_payment_intent)
     end
 
-    it "stays pending when Stripe status is requires_payment_method" do
-      allow(stripe_client).to receive(:find_payment_intent)
-        .and_return(stripe_payment_intent(status: "requires_payment_method"))
+    it "marks payment as failed when Stripe returns canceled" do
+      canceled = stripe_payment_intent(status: "canceled")
+      allow(canceled).to receive(:last_payment_error).and_return(nil)
+      allow(stripe_client).to receive(:find_payment_intent).and_return(canceled)
 
       payment.confirm_payment
 
-      expect(payment.reload).to be_pending
+      payment.reload
+      expect(payment).to be_failed
+      expect(payment.error_message).to eq("Payment canceled")
+    end
+
+    it "marks payment as failed with error message from Stripe" do
+      allow(stripe_client).to receive(:find_payment_intent)
+        .and_return(stripe_failed_intent(message: "Your card was declined."))
+
+      payment.confirm_payment
+
+      payment.reload
+      expect(payment).to be_failed
+      expect(payment.error_message).to eq("Your card was declined.")
     end
 
     it "stays pending when Stripe status is requires_action" do

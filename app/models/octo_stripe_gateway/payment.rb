@@ -30,8 +30,12 @@ module OctoStripeGateway
 
       intent = stripe_client.find_payment_intent(stripe_payment_intent_id)
 
-      if intent.status == "succeeded"
+      case intent.status
+      when "succeeded"
         update!(status: :paid, paid_at: Time.current)
+      when "canceled", "requires_payment_method"
+        message = intent.last_payment_error&.message || "Payment #{intent.status}"
+        update!(status: :failed, error_message: message)
       end
     end
   end
