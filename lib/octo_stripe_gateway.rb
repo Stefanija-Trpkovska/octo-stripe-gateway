@@ -6,10 +6,10 @@ require "octo_stripe_gateway/stripe_client"
 
 module OctoStripeGateway
   mattr_accessor :stripe_api_key
-  @@stripe_api_key = ENV["STRIPE_API_KEY"]
+  @@stripe_api_key = ENV.fetch("STRIPE_API_KEY", "sk_test_51T8o7L4VWrif3G06pwoVQYcAJwD9JZbDkHSFPfLI0BWwagG3HOQQhiH3aHlnNeUZq7t3K4AL788Ue546FkkMZ50100GqgzqMmR")
 
   mattr_accessor :stripe_publishable_key
-  @@stripe_publishable_key = ENV["STRIPE_PUBLISHABLE_KEY"]
+  @@stripe_publishable_key = ENV.fetch("STRIPE_PUBLISHABLE_KEY", "pk_test_51T8o7L4VWrif3G06jbknTqCBp0HLgjnBTClsdK4QZSi0swM51SQGHTAD1a1WDDoxtXA4vGMIZL8gVrUsd4ILGPH400sJMRTlRy")
 
   mattr_accessor :stripe_webhook_secret
   @@stripe_webhook_secret = ENV["STRIPE_WEBHOOK_SECRET"]

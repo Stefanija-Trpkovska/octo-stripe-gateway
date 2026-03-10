@@ -40,7 +40,7 @@ OctoStripeGateway.setup do |config|
 end
 ```
 
-All Stripe keys must be set explicitly. The engine will not fall back to test keys.
+The gem ships with Stripe test environment keys by default, so it works out of the box for development. Override with your own keys via env vars or the setup block for production.
 
 ## Authentication
 
